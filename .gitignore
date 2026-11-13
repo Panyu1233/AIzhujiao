@@ -1,0 +1,188 @@
+node_modules
+dist
+.DS_Store
+*.swp
+.git/*
+__pycache__/
+*.pyc
+.venv/*
+*.o
+*.a
+/vendor
+*.egg-info/
+/.env
+.env
+.env*.local
+
+# 本地调试用临时二进制样本（不入库）
+.appproj/reduction
+
+# JS/TS bundlers & build outputs
+.next
+.nuxt
+.turbo
+.vercel
+.parcel-cache
+.cache
+coverage
+storybook-static
+
+# Package manager artifacts
+.pnp*
+.npm
+
+# Python tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# Go tooling
+bin/
+*.test
+
+# Editor / IDE
+.vscode/
+.idea/
+*.iml
+
+# OS / misc
+Thumbs.db
+ehthumbs.db
+
+# Logs
+output.log
+*.log
+*.log.*
+logs/
+
+# 视频文件
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.mkv
+*.webm
+*.m4v
+*.mpeg
+*.mpg
+*.3gp
+*.f4v
+*.rmvb
+*.vob
+
+# 归档文件
+*.iso
+*.dmg
+*.rar
+*.zip
+*.gz
+
+# 文档类也默认加入
+*.pdf
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.ppt
+*.pptx
+*.xlsx
+*.csv
+
+# 知识库目录内的文件（含 docx/pdf/xlsx）必须入库，否则生产环境缺文件
+# （生产部署会将 KNOWLEDGE_BASE_ROOT 指向仓库内 knowledge-base/ 或其挂载点）
+!knowledge-base/**
+!knowledge-base/**/
+
+# Preview files
+.preview
+
+# CodeGraph index
+.codegraph
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+# Production build
+dist/
+build/
+out/
+.next/
+.rsbuild/
+# Testing
+coverage/
+*.lcov
+.nyc_output
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+
+# 知识库内容必须入库，供生产部署与 FastGPT 拉取
+!knowledge-base/**
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+node-compile-cache/
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swo
+*~
+# OS files
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Desktop.ini
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+# Optional files
+*.tgz
+*.tar
+# TypeScript
+*.tsbuildinfo
+# Misc
+.app-logs
+.codegraph/
+
+
+# 运行时本地数据（用户信息、聊天记录、暂存/正式库文件和同步状态）
+knowledge-base/local-data/
+knowledge-base/staging/
+knowledge-base/.volcano-sync-state.json
+/staging/
+
+# 本地部署密钥与压缩包
+.env.production
+ai-zhujiao-production.env
+ai-zhujiao-deploy-*.tar.gz

@@ -1,0 +1,33 @@
+# node_modules / 构建产物不进入镜像，由容器内 pnpm install 重建
+node_modules
+.next
+dist
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# 日志 / 缓存
+logs
+*.log
+.cache
+.turbo
+.parcel-cache
+.preview
+
+# 本地环境变量（含密钥）
+.env
+.env*.local
+.env.local
+
+# 编辑器 / 系统
+.vscode
+.idea
+.DS_Store
+*.swp
+
+# git 元数据
+.git
+.gitignore
+
+# 注意：knowledge-base/ 里的 docx/pdf/xlsx 需要打进镜像（用于 KNOWLEDGE_BASE_ROOT 有默认值时的兜底）。
+# 若改为纯挂载目录方案，可把下面一行打开以减小镜像体积：
+# knowledge-base

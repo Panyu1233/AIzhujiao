@@ -1,0 +1,2280 @@
+[
+  {
+    "sheet": "表1-底层知识库表",
+    "table": "kb_knowledge",
+    "columns": [
+      {
+        "name": "knowledge_id",
+        "type": "BIGINT",
+        "required": "Y",
+        "key": "PK",
+        "desc": "知识主键"
+      },
+      {
+        "name": "knowledge_code",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "UK",
+        "desc": "知识编号"
+      },
+      {
+        "name": "parent_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX/FK自关联",
+        "desc": "父知识ID"
+      },
+      {
+        "name": "knowledge_type",
+        "type": "VARCHAR(32)",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "FAQ/话术/产品/健康知识/流程/多轮/报告解读"
+      },
+      {
+        "name": "category_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "分类ID"
+      },
+      {
+        "name": "category_path",
+        "type": "VARCHAR(512)",
+        "required": "N",
+        "key": "",
+        "desc": "分类路径快照"
+      },
+      {
+        "name": "tags",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "标签数组"
+      },
+      {
+        "name": "standard_question",
+        "type": "VARCHAR(1000)",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "标准问题"
+      },
+      {
+        "name": "similar_questions",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "相似问法数组"
+      },
+      {
+        "name": "keywords",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "检索关键词数组"
+      },
+      {
+        "name": "intent",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "意图标识"
+      },
+      {
+        "name": "standard_answer",
+        "type": "TEXT",
+        "required": "Y",
+        "key": "",
+        "desc": "标准答案"
+      },
+      {
+        "name": "rich_content",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "富文本/结构化答案"
+      },
+      {
+        "name": "attachments",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "图片、文件、链接"
+      },
+      {
+        "name": "answer_type",
+        "type": "VARCHAR(32)",
+        "required": "Y",
+        "key": "",
+        "desc": "文本/富文本/图片/多轮/转人工"
+      },
+      {
+        "name": "business_domain",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "减脂营/基因检测/体脂秤/报告解读/入营流程/会员"
+      },
+      {
+        "name": "product_type",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "JF/JB/Zbox/体脂秤/小程序/减脂营"
+      },
+      {
+        "name": "box_type_scope",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "适用检测盒类型：JF/JB"
+      },
+      {
+        "name": "detection_type_scope",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "适用检测类型：normal/zbox"
+      },
+      {
+        "name": "customer_category_scope",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "northland/non_northland"
+      },
+      {
+        "name": "northland_required",
+        "type": "TINYINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "是否仅北方大陆会员适用"
+      },
+      {
+        "name": "group_scope",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "适用微信群ID数组"
+      },
+      {
+        "name": "channel_scope",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "",
+        "desc": "微信群/小程序/后台"
+      },
+      {
+        "name": "sex_scope",
+        "type": "VARCHAR(16)",
+        "required": "N",
+        "key": "",
+        "desc": "男/女/不限"
+      },
+      {
+        "name": "age_min",
+        "type": "INT",
+        "required": "N",
+        "key": "",
+        "desc": "适用最小年龄"
+      },
+      {
+        "name": "age_max",
+        "type": "INT",
+        "required": "N",
+        "key": "",
+        "desc": "适用最大年龄"
+      },
+      {
+        "name": "bmi_scope_min",
+        "type": "DECIMAL(4,2)",
+        "required": "N",
+        "key": "",
+        "desc": "适用BMI下限"
+      },
+      {
+        "name": "bmi_scope_max",
+        "type": "DECIMAL(4,2)",
+        "required": "N",
+        "key": "",
+        "desc": "适用BMI上限"
+      },
+      {
+        "name": "risk_level",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "普通/关注/高风险/禁忌"
+      },
+      {
+        "name": "contraindication",
+        "type": "TEXT",
+        "required": "N",
+        "key": "",
+        "desc": "禁忌说明"
+      },
+      {
+        "name": "risk_warning",
+        "type": "TEXT",
+        "required": "N",
+        "key": "",
+        "desc": "风险提示话术"
+      },
+      {
+        "name": "org_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "机构/租户ID"
+      },
+      {
+        "name": "robot_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "机器人ID"
+      },
+      {
+        "name": "course_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "课程/项目ID"
+      },
+      {
+        "name": "source_type",
+        "type": "VARCHAR(32)",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "basic/training/manual"
+      },
+      {
+        "name": "source_training_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "FK/IDX",
+        "desc": "来源训练记录ID，关联 train_record.train_id"
+      },
+      {
+        "name": "source_message_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "FK/IDX",
+        "desc": "来源聊天消息ID，关联 chat_message.message_id"
+      },
+      {
+        "name": "source_user_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "FK/IDX",
+        "desc": "来源用户ID，关联 user_info.id"
+      },
+      {
+        "name": "source_business_type",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "",
+        "desc": "逻辑追溯业务类型，非外键"
+      },
+      {
+        "name": "source_business_id",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "",
+        "desc": "逻辑追溯业务ID，非外键"
+      },
+      {
+        "name": "import_batch",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "导入批次"
+      },
+      {
+        "name": "audit_status",
+        "type": "VARCHAR(32)",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "待审核/已通过/已拒绝/已停用"
+      },
+      {
+        "name": "auditor_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "",
+        "desc": "审核人"
+      },
+      {
+        "name": "audit_time",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "审核时间"
+      },
+      {
+        "name": "confirmed_by",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "",
+        "desc": "确认导入人"
+      },
+      {
+        "name": "confirmed_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "确认导入时间"
+      },
+      {
+        "name": "priority",
+        "type": "INT",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "优先级"
+      },
+      {
+        "name": "confidence",
+        "type": "DECIMAL(5,4)",
+        "required": "N",
+        "key": "",
+        "desc": "置信度"
+      },
+      {
+        "name": "status",
+        "type": "TINYINT",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "1启用/0停用"
+      },
+      {
+        "name": "version",
+        "type": "INT",
+        "required": "Y",
+        "key": "",
+        "desc": "版本号"
+      },
+      {
+        "name": "effective_start",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "IDX",
+        "desc": "生效开始"
+      },
+      {
+        "name": "effective_end",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "IDX",
+        "desc": "生效结束"
+      },
+      {
+        "name": "hit_count",
+        "type": "BIGINT",
+        "required": "Y",
+        "key": "",
+        "desc": "命中次数"
+      },
+      {
+        "name": "last_hit_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "最后命中时间"
+      },
+      {
+        "name": "feedback_score",
+        "type": "DECIMAL(5,2)",
+        "required": "N",
+        "key": "",
+        "desc": "反馈评分"
+      },
+      {
+        "name": "chunk_id",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "RAG分块ID"
+      },
+      {
+        "name": "embedding_status",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "未向量化/已向量化/失败"
+      },
+      {
+        "name": "vector_id",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "向量库ID"
+      },
+      {
+        "name": "last_index_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "最后索引时间"
+      },
+      {
+        "name": "created_by",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "",
+        "desc": "创建人"
+      },
+      {
+        "name": "created_at",
+        "type": "DATETIME",
+        "required": "Y",
+        "key": "",
+        "desc": "创建时间"
+      },
+      {
+        "name": "updated_by",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "",
+        "desc": "更新人"
+      },
+      {
+        "name": "updated_at",
+        "type": "DATETIME",
+        "required": "Y",
+        "key": "",
+        "desc": "更新时间"
+      },
+      {
+        "name": "remark",
+        "type": "VARCHAR(1000)",
+        "required": "N",
+        "key": "",
+        "desc": "备注"
+      }
+    ]
+  },
+  {
+    "sheet": "表2-训练聊天记录表",
+    "table": "train_record",
+    "columns": [
+      {
+        "name": "train_id",
+        "type": "BIGINT",
+        "required": "Y",
+        "key": "PK",
+        "desc": "训练记录主键"
+      },
+      {
+        "name": "train_no",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "UK",
+        "desc": "训练编号"
+      },
+      {
+        "name": "train_source",
+        "type": "VARCHAR(32)",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "personal_wechat/robot_backend"
+      },
+      {
+        "name": "train_batch_id",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "训练批次"
+      },
+      {
+        "name": "org_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "机构/租户ID"
+      },
+      {
+        "name": "robot_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "机器人ID"
+      },
+      {
+        "name": "operator_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "操作人ID"
+      },
+      {
+        "name": "operator_name",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "",
+        "desc": "操作人名称"
+      },
+      {
+        "name": "backend_account",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "机器人后台训练账号"
+      },
+      {
+        "name": "user_id",
+        "type": "BIGINT",
+        "required": "条件",
+        "key": "FK/IDX",
+        "desc": "关联 user_info.id"
+      },
+      {
+        "name": "wechat_openid",
+        "type": "VARCHAR(128)",
+        "required": "条件",
+        "key": "IDX",
+        "desc": "个人微信训练对象openid"
+      },
+      {
+        "name": "openid_type",
+        "type": "VARCHAR(16)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "mini/mp/group"
+      },
+      {
+        "name": "wechat_unionid",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "微信unionid"
+      },
+      {
+        "name": "wechat_nickname",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "",
+        "desc": "微信昵称快照"
+      },
+      {
+        "name": "group_id",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "来源群ID"
+      },
+      {
+        "name": "group_name_snapshot",
+        "type": "VARCHAR(255)",
+        "required": "N",
+        "key": "",
+        "desc": "群名快照"
+      },
+      {
+        "name": "group_nickname_snapshot",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "",
+        "desc": "群内昵称快照"
+      },
+      {
+        "name": "chat_file_id",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "",
+        "desc": "聊天文件/附件ID"
+      },
+      {
+        "name": "business_domain",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "减脂营/基因检测/体脂秤/报告解读/入营流程"
+      },
+      {
+        "name": "customer_category",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "northland/non_northland"
+      },
+      {
+        "name": "northland_member_id",
+        "type": "VARCHAR(50)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "北方大陆会员编号"
+      },
+      {
+        "name": "box_type",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "JF/JB"
+      },
+      {
+        "name": "detection_type",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "normal/zbox"
+      },
+      {
+        "name": "sample_id",
+        "type": "VARCHAR(50)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "样本编号"
+      },
+      {
+        "name": "enroll_status",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "enrolled/unenrolled"
+      },
+      {
+        "name": "keyword",
+        "type": "VARCHAR(512)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "训练关键词"
+      },
+      {
+        "name": "raw_question",
+        "type": "TEXT",
+        "required": "N",
+        "key": "",
+        "desc": "原始问题"
+      },
+      {
+        "name": "standard_question",
+        "type": "VARCHAR(1000)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "标准问题"
+      },
+      {
+        "name": "raw_answer",
+        "type": "TEXT",
+        "required": "N",
+        "key": "",
+        "desc": "原始回答"
+      },
+      {
+        "name": "corrected_answer",
+        "type": "TEXT",
+        "required": "N",
+        "key": "",
+        "desc": "修正答案"
+      },
+      {
+        "name": "train_type",
+        "type": "VARCHAR(32)",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "问答/纠错/话术/关键词/多轮"
+      },
+      {
+        "name": "intent",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "意图"
+      },
+      {
+        "name": "confirm_status",
+        "type": "VARCHAR(32)",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "待确认/已确认/已拒绝/已导入"
+      },
+      {
+        "name": "confirmed_by",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "",
+        "desc": "确认人"
+      },
+      {
+        "name": "confirmed_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "确认时间"
+      },
+      {
+        "name": "imported_knowledge_id",
+        "type": "BIGINT",
+        "required": "条件",
+        "key": "FK/IDX",
+        "desc": "导入后的知识ID，关联 kb_knowledge.knowledge_id"
+      },
+      {
+        "name": "reject_reason",
+        "type": "VARCHAR(1000)",
+        "required": "N",
+        "key": "",
+        "desc": "拒绝原因"
+      },
+      {
+        "name": "quality_score",
+        "type": "DECIMAL(5,2)",
+        "required": "N",
+        "key": "",
+        "desc": "样本质量分"
+      },
+      {
+        "name": "tags",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "样本标签"
+      },
+      {
+        "name": "sample_status",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "草稿/可用/废弃"
+      },
+      {
+        "name": "remark",
+        "type": "VARCHAR(1000)",
+        "required": "N",
+        "key": "",
+        "desc": "备注"
+      },
+      {
+        "name": "created_at",
+        "type": "DATETIME",
+        "required": "Y",
+        "key": "",
+        "desc": "创建时间"
+      },
+      {
+        "name": "updated_at",
+        "type": "DATETIME",
+        "required": "Y",
+        "key": "",
+        "desc": "更新时间"
+      }
+    ]
+  },
+  {
+    "sheet": "表3-单用户聊天记录表",
+    "table": "chat_message",
+    "columns": [
+      {
+        "name": "message_id",
+        "type": "BIGINT",
+        "required": "Y",
+        "key": "PK",
+        "desc": "消息主键"
+      },
+      {
+        "name": "wechat_msg_id",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "UK/IDX",
+        "desc": "微信消息ID"
+      },
+      {
+        "name": "session_id",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "会话ID"
+      },
+      {
+        "name": "parent_message_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX/FK自关联",
+        "desc": "回复父消息ID"
+      },
+      {
+        "name": "org_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "机构/租户ID"
+      },
+      {
+        "name": "group_id",
+        "type": "VARCHAR(128)",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "微信群ID"
+      },
+      {
+        "name": "group_name_snapshot",
+        "type": "VARCHAR(255)",
+        "required": "N",
+        "key": "",
+        "desc": "群名快照"
+      },
+      {
+        "name": "group_nickname_snapshot",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "",
+        "desc": "群内昵称快照"
+      },
+      {
+        "name": "sender_openid",
+        "type": "VARCHAR(128)",
+        "required": "条件",
+        "key": "IDX",
+        "desc": "发送者openid"
+      },
+      {
+        "name": "sender_openid_type",
+        "type": "VARCHAR(16)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "mini/mp/group"
+      },
+      {
+        "name": "sender_unionid",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "发送者unionid"
+      },
+      {
+        "name": "sender_nickname_snapshot",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "",
+        "desc": "微信昵称快照"
+      },
+      {
+        "name": "user_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "FK/IDX",
+        "desc": "关联 user_info.id，可空待补"
+      },
+      {
+        "name": "phone_snapshot",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "手机号快照，建议脱敏/密文"
+      },
+      {
+        "name": "customer_category_snapshot",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "northland/non_northland快照"
+      },
+      {
+        "name": "northland_member_id_snapshot",
+        "type": "VARCHAR(50)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "北方大陆会员编号快照"
+      },
+      {
+        "name": "box_type_snapshot",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "JF/JB快照"
+      },
+      {
+        "name": "detection_type_snapshot",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "normal/zbox快照"
+      },
+      {
+        "name": "sample_id_snapshot",
+        "type": "VARCHAR(50)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "样本编号快照"
+      },
+      {
+        "name": "enroll_status_snapshot",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "入营状态快照"
+      },
+      {
+        "name": "business_domain_snapshot",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "业务域快照"
+      },
+      {
+        "name": "msg_type",
+        "type": "VARCHAR(32)",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "text/image/voice/file/video/link/system"
+      },
+      {
+        "name": "content",
+        "type": "TEXT",
+        "required": "N",
+        "key": "全文索引",
+        "desc": "文本/转写文本"
+      },
+      {
+        "name": "raw_content",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "原始消息结构"
+      },
+      {
+        "name": "media_url",
+        "type": "VARCHAR(1000)",
+        "required": "N",
+        "key": "",
+        "desc": "媒体地址"
+      },
+      {
+        "name": "send_time",
+        "type": "DATETIME",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "发送时间"
+      },
+      {
+        "name": "msg_direction",
+        "type": "VARCHAR(32)",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "user/ai/human/system"
+      },
+      {
+        "name": "is_ai_reply",
+        "type": "TINYINT",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "是否AI回复"
+      },
+      {
+        "name": "robot_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "回复机器人ID"
+      },
+      {
+        "name": "related_knowledge_id",
+        "type": "BIGINT",
+        "required": "条件",
+        "key": "FK/IDX",
+        "desc": "命中知识ID，关联 kb_knowledge.knowledge_id"
+      },
+      {
+        "name": "hit_status",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "命中/未命中/转人工"
+      },
+      {
+        "name": "is_sensitive",
+        "type": "TINYINT",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "是否敏感"
+      },
+      {
+        "name": "desensitized_content",
+        "type": "TEXT",
+        "required": "N",
+        "key": "",
+        "desc": "脱敏内容"
+      },
+      {
+        "name": "memory_candidate",
+        "type": "TINYINT",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "是否记忆候选"
+      },
+      {
+        "name": "memory_extract_status",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "未抽取/已抽取/已忽略/已合并"
+      },
+      {
+        "name": "memory_summary",
+        "type": "TEXT",
+        "required": "N",
+        "key": "",
+        "desc": "本条记忆摘要"
+      },
+      {
+        "name": "memory_category",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "偏好/健康/身份/目标/禁忌等"
+      },
+      {
+        "name": "memory_confidence",
+        "type": "DECIMAL(5,4)",
+        "required": "N",
+        "key": "",
+        "desc": "记忆置信度"
+      },
+      {
+        "name": "memory_valid_from",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "记忆有效期开始"
+      },
+      {
+        "name": "memory_valid_to",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "记忆有效期结束"
+      },
+      {
+        "name": "is_deleted",
+        "type": "TINYINT",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "是否删除"
+      },
+      {
+        "name": "created_at",
+        "type": "DATETIME",
+        "required": "Y",
+        "key": "",
+        "desc": "入库时间"
+      }
+    ]
+  },
+  {
+    "sheet": "表4-用户信息表",
+    "table": "user_info",
+    "columns": [
+      {
+        "name": "id",
+        "type": "BIGINT",
+        "required": "Y",
+        "key": "PK",
+        "desc": "用户主键，其他表 user_id 关联此字段"
+      },
+      {
+        "name": "user_no",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "UK",
+        "desc": "用户业务编号"
+      },
+      {
+        "name": "org_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "机构/租户ID"
+      },
+      {
+        "name": "openid",
+        "type": "VARCHAR(128)",
+        "required": "条件",
+        "key": "IDX",
+        "desc": "主OpenID；小程序/公众号必填，纯群客户可空"
+      },
+      {
+        "name": "unionid",
+        "type": "VARCHAR(128)",
+        "required": "条件",
+        "key": "IDX",
+        "desc": "微信UnionID；小程序/公众号必填，纯群客户可空"
+      },
+      {
+        "name": "mini_openid",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "小程序OpenID"
+      },
+      {
+        "name": "mp_openid",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "公众号OpenID"
+      },
+      {
+        "name": "group_openid",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "群场景OpenID"
+      },
+      {
+        "name": "token",
+        "type": "VARCHAR(256)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "登录令牌，敏感，建议加密或独立表"
+      },
+      {
+        "name": "nick_name",
+        "type": "VARCHAR(128)",
+        "required": "Y",
+        "key": "",
+        "desc": "当前微信昵称"
+      },
+      {
+        "name": "avatar_url",
+        "type": "VARCHAR(512)",
+        "required": "N",
+        "key": "",
+        "desc": "微信头像"
+      },
+      {
+        "name": "gender",
+        "type": "INT",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "0未知/1男/2女"
+      },
+      {
+        "name": "phone",
+        "type": "VARCHAR(32)",
+        "required": "条件",
+        "key": "IDX",
+        "desc": "手机号；小程序必填，群客户可空，敏感"
+      },
+      {
+        "name": "phone_mask",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "",
+        "desc": "脱敏手机号"
+      },
+      {
+        "name": "phone_verified",
+        "type": "BOOLEAN",
+        "required": "N",
+        "key": "",
+        "desc": "手机是否验证"
+      },
+      {
+        "name": "phone_source",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "",
+        "desc": "小程序授权/用户填写/后台导入"
+      },
+      {
+        "name": "phone_authorized",
+        "type": "BOOLEAN",
+        "required": "N",
+        "key": "",
+        "desc": "手机号是否授权"
+      },
+      {
+        "name": "real_name",
+        "type": "VARCHAR(64)",
+        "required": "条件",
+        "key": "",
+        "desc": "真实姓名；小程序必填，群客户可空"
+      },
+      {
+        "name": "is_authorized",
+        "type": "BOOLEAN",
+        "required": "N",
+        "key": "",
+        "desc": "是否完成微信授权"
+      },
+      {
+        "name": "birthday",
+        "type": "DATE",
+        "required": "条件",
+        "key": "IDX",
+        "desc": "出生日期；小程序必填，群客户可空"
+      },
+      {
+        "name": "age",
+        "type": "INT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "年龄，可由birthday计算"
+      },
+      {
+        "name": "location",
+        "type": "VARCHAR(100)",
+        "required": "N",
+        "key": "",
+        "desc": "省市区"
+      },
+      {
+        "name": "source_type",
+        "type": "VARCHAR(32)",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "mini_program/wechat_group/mixed/backend"
+      },
+      {
+        "name": "source_detail",
+        "type": "VARCHAR(255)",
+        "required": "N",
+        "key": "",
+        "desc": "来源明细"
+      },
+      {
+        "name": "tags",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "用户标签"
+      },
+      {
+        "name": "profile",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "用户画像扩展"
+      },
+      {
+        "name": "status",
+        "type": "TINYINT",
+        "required": "Y",
+        "key": "IDX",
+        "desc": "1正常/0停用"
+      },
+      {
+        "name": "remark",
+        "type": "VARCHAR(1000)",
+        "required": "N",
+        "key": "",
+        "desc": "备注"
+      },
+      {
+        "name": "privacy_consent",
+        "type": "TINYINT",
+        "required": "Y",
+        "key": "",
+        "desc": "隐私授权"
+      },
+      {
+        "name": "consent_time",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "授权时间"
+      },
+      {
+        "name": "first_seen_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "首次出现时间"
+      },
+      {
+        "name": "last_active_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "IDX",
+        "desc": "最后活跃时间"
+      },
+      {
+        "name": "merge_to_user_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX/FK自关联",
+        "desc": "合并到主用户ID"
+      },
+      {
+        "name": "merge_status",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "正常/待合并/已合并"
+      },
+      {
+        "name": "wechat_profile_updated_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "微信资料最后更新时间"
+      },
+      {
+        "name": "created_at",
+        "type": "DATETIME",
+        "required": "Y",
+        "key": "",
+        "desc": "账号创建时间"
+      },
+      {
+        "name": "updated_at",
+        "type": "DATETIME",
+        "required": "Y",
+        "key": "",
+        "desc": "更新时间"
+      },
+      {
+        "name": "customer_info_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "逻辑追溯ID，非四表外键"
+      },
+      {
+        "name": "enroll_status",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "enrolled/unenrolled"
+      },
+      {
+        "name": "enroll_time",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "入营完成时间"
+      },
+      {
+        "name": "enroll_created_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "入营登记提交时间"
+      },
+      {
+        "name": "enroll_updated_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "入营登记更新时间"
+      },
+      {
+        "name": "wechat_group_name",
+        "type": "VARCHAR(255)",
+        "required": "N",
+        "key": "",
+        "desc": "当前微信群名称"
+      },
+      {
+        "name": "wechat_group_id",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "当前微信群ID"
+      },
+      {
+        "name": "wechat_group_nickname",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "",
+        "desc": "当前群内昵称"
+      },
+      {
+        "name": "enroll_wechat_group_name",
+        "type": "VARCHAR(255)",
+        "required": "N",
+        "key": "",
+        "desc": "入营时群名快照"
+      },
+      {
+        "name": "enroll_wechat_group_id",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "入营时群ID快照"
+      },
+      {
+        "name": "enroll_wechat_group_nickname",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "",
+        "desc": "入营时群昵称快照"
+      },
+      {
+        "name": "first_source_group_id",
+        "type": "VARCHAR(128)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "首次来源群ID"
+      },
+      {
+        "name": "first_source_group_name",
+        "type": "VARCHAR(255)",
+        "required": "N",
+        "key": "",
+        "desc": "首次来源群名"
+      },
+      {
+        "name": "group_ids",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "所在群ID数组"
+      },
+      {
+        "name": "group_names_snapshot",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "群名快照数组"
+      },
+      {
+        "name": "join_group_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "首次入群时间"
+      },
+      {
+        "name": "northland_member_id",
+        "type": "VARCHAR(50)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "北方大陆会员编号"
+      },
+      {
+        "name": "customer_category",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "northland/non_northland"
+      },
+      {
+        "name": "customer_info_raw",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "入营登记原始数据兜底"
+      },
+      {
+        "name": "gene_binding_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "逻辑追溯ID，非四表外键"
+      },
+      {
+        "name": "latest_gene_box_type",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "JF/JB"
+      },
+      {
+        "name": "gene_box_name",
+        "type": "VARCHAR(100)",
+        "required": "N",
+        "key": "",
+        "desc": "检测盒名称"
+      },
+      {
+        "name": "gene_customer_category",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "northland/non_northland"
+      },
+      {
+        "name": "gene_northland_member_id",
+        "type": "VARCHAR(50)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "基因绑定会员编号"
+      },
+      {
+        "name": "gene_sample_id",
+        "type": "VARCHAR(50)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "基因样本编号"
+      },
+      {
+        "name": "gene_name",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "",
+        "desc": "绑定人姓名"
+      },
+      {
+        "name": "gene_phone",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "绑定人手机号，敏感"
+      },
+      {
+        "name": "gene_agree_terms",
+        "type": "BOOLEAN",
+        "required": "N",
+        "key": "",
+        "desc": "是否同意协议"
+      },
+      {
+        "name": "gene_qr_code_url",
+        "type": "VARCHAR(512)",
+        "required": "N",
+        "key": "",
+        "desc": "扫码来源URL"
+      },
+      {
+        "name": "gene_bind_status",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "bound"
+      },
+      {
+        "name": "gene_created_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "绑定完成时间"
+      },
+      {
+        "name": "gene_bindings_raw",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "基因绑定历史全量"
+      },
+      {
+        "name": "sample_binding_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "逻辑追溯ID，非四表外键"
+      },
+      {
+        "name": "sample_user_name",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "",
+        "desc": "样本用户姓名"
+      },
+      {
+        "name": "sample_sex",
+        "type": "VARCHAR(10)",
+        "required": "N",
+        "key": "",
+        "desc": "性别"
+      },
+      {
+        "name": "sample_phone",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "样本绑定手机号，敏感"
+      },
+      {
+        "name": "sample_vcode_last",
+        "type": "VARCHAR(10)",
+        "required": "N",
+        "key": "",
+        "desc": "最近验证码，敏感，建议哈希/加密"
+      },
+      {
+        "name": "sample_agree",
+        "type": "BOOLEAN",
+        "required": "N",
+        "key": "",
+        "desc": "是否同意协议"
+      },
+      {
+        "name": "sample_detection_type",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "normal/zbox"
+      },
+      {
+        "name": "sample_id",
+        "type": "VARCHAR(50)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "样本ID"
+      },
+      {
+        "name": "sample_bind_status",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "success"
+      },
+      {
+        "name": "sample_created_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "样本绑定完成时间"
+      },
+      {
+        "name": "sample_bindings_raw",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "样本绑定历史全量"
+      },
+      {
+        "name": "sms_last_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "逻辑追溯ID，非四表外键"
+      },
+      {
+        "name": "sms_last_phone",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "最新验证码手机号"
+      },
+      {
+        "name": "sms_last_code",
+        "type": "VARCHAR(10)",
+        "required": "N",
+        "key": "",
+        "desc": "最新验证码，敏感，建议哈希/加密"
+      },
+      {
+        "name": "sms_last_type",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "bind/verify"
+      },
+      {
+        "name": "sms_last_status",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "sent/verified/expired"
+      },
+      {
+        "name": "sms_last_expire_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "最新验证码过期时间"
+      },
+      {
+        "name": "sms_last_verified_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "最新验证通过时间"
+      },
+      {
+        "name": "sms_last_created_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "最新验证码发送时间"
+      },
+      {
+        "name": "sms_records_raw",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "短信验证历史全量，敏感"
+      },
+      {
+        "name": "exam_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "逻辑追溯ID，非四表外键"
+      },
+      {
+        "name": "exam_weight_kg",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "入营评测体重kg"
+      },
+      {
+        "name": "exam_water_intake",
+        "type": "INT",
+        "required": "N",
+        "key": "",
+        "desc": "每日饮水量ml"
+      },
+      {
+        "name": "exam_score",
+        "type": "INT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "健康评测得分"
+      },
+      {
+        "name": "exam_completed",
+        "type": "BOOLEAN",
+        "required": "N",
+        "key": "IDX",
+        "desc": "是否完成健康评测"
+      },
+      {
+        "name": "exam_created_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "评测完成时间"
+      },
+      {
+        "name": "exam_updated_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "评测更新时间"
+      },
+      {
+        "name": "exam_history_raw",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "评测历史全量"
+      },
+      {
+        "name": "scale_record_id",
+        "type": "BIGINT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "逻辑追溯ID，非四表外键"
+      },
+      {
+        "name": "scale_completed",
+        "type": "BOOLEAN",
+        "required": "N",
+        "key": "IDX",
+        "desc": "是否完成试秤"
+      },
+      {
+        "name": "scale_created_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "试秤完成时间"
+      },
+      {
+        "name": "scale_updated_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "体脂秤记录更新时间"
+      },
+      {
+        "name": "scale_weight_kg",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "体脂秤体重kg"
+      },
+      {
+        "name": "bmi",
+        "type": "DECIMAL(4,2)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "BMI"
+      },
+      {
+        "name": "body_fat_rate",
+        "type": "DECIMAL(4,2)",
+        "required": "N",
+        "key": "",
+        "desc": "体脂率%"
+      },
+      {
+        "name": "muscle_mass",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "肌肉量kg"
+      },
+      {
+        "name": "water_rate",
+        "type": "DECIMAL(4,2)",
+        "required": "N",
+        "key": "",
+        "desc": "身体水分率%"
+      },
+      {
+        "name": "basal_metabolism",
+        "type": "INT",
+        "required": "N",
+        "key": "",
+        "desc": "基础代谢率千卡"
+      },
+      {
+        "name": "bone_mass",
+        "type": "DECIMAL(4,2)",
+        "required": "N",
+        "key": "",
+        "desc": "骨量kg"
+      },
+      {
+        "name": "visceral_fat_level",
+        "type": "INT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "内脏脂肪等级"
+      },
+      {
+        "name": "protein_rate",
+        "type": "DECIMAL(4,2)",
+        "required": "N",
+        "key": "",
+        "desc": "蛋白质率%"
+      },
+      {
+        "name": "body_age",
+        "type": "INT",
+        "required": "N",
+        "key": "",
+        "desc": "身体年龄"
+      },
+      {
+        "name": "skeletal_muscle_rate",
+        "type": "DECIMAL(4,2)",
+        "required": "N",
+        "key": "",
+        "desc": "骨骼肌率%"
+      },
+      {
+        "name": "fat_free_mass",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "去脂体重kg"
+      },
+      {
+        "name": "body_fat_mass",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "体脂量kg"
+      },
+      {
+        "name": "water_mass",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "身体水分量kg"
+      },
+      {
+        "name": "daily_calorie_consumption",
+        "type": "INT",
+        "required": "N",
+        "key": "",
+        "desc": "每日消耗卡路里"
+      },
+      {
+        "name": "obesity_level",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "肥胖等级"
+      },
+      {
+        "name": "body_type",
+        "type": "VARCHAR(20)",
+        "required": "N",
+        "key": "",
+        "desc": "体型分类"
+      },
+      {
+        "name": "scale_score",
+        "type": "INT",
+        "required": "N",
+        "key": "",
+        "desc": "体脂评分"
+      },
+      {
+        "name": "scale_history_raw",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "体脂秤历史全量"
+      },
+      {
+        "name": "survey_answers_raw",
+        "type": "JSON",
+        "required": "Y",
+        "key": "",
+        "desc": "问卷答案全量原始保存"
+      },
+      {
+        "name": "health_questionnaire_id",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "健康问卷ID"
+      },
+      {
+        "name": "health_survey_time",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "健康调研时间"
+      },
+      {
+        "name": "health_questionnaire_raw",
+        "type": "JSON",
+        "required": "Y",
+        "key": "",
+        "desc": "健康问卷原始答案全量"
+      },
+      {
+        "name": "health_profile_ext",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "健康扩展字段兜底"
+      },
+      {
+        "name": "health_data_source",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "",
+        "desc": "问卷/体检/设备/人工"
+      },
+      {
+        "name": "health_data_updated_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "健康数据更新时间"
+      },
+      {
+        "name": "health_consent",
+        "type": "TINYINT",
+        "required": "Y",
+        "key": "",
+        "desc": "健康数据授权"
+      },
+      {
+        "name": "height_cm",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "身高cm"
+      },
+      {
+        "name": "health_weight_kg",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "健康问卷体重kg"
+      },
+      {
+        "name": "waist_cm",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "腰围cm"
+      },
+      {
+        "name": "hip_cm",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "臀围cm"
+      },
+      {
+        "name": "blood_pressure_systolic",
+        "type": "INT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "收缩压"
+      },
+      {
+        "name": "blood_pressure_diastolic",
+        "type": "INT",
+        "required": "N",
+        "key": "IDX",
+        "desc": "舒张压"
+      },
+      {
+        "name": "heart_rate",
+        "type": "INT",
+        "required": "N",
+        "key": "",
+        "desc": "心率"
+      },
+      {
+        "name": "fasting_glucose",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "空腹血糖"
+      },
+      {
+        "name": "postprandial_glucose",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "餐后血糖"
+      },
+      {
+        "name": "hba1c",
+        "type": "DECIMAL(5,2)",
+        "required": "N",
+        "key": "",
+        "desc": "糖化血红蛋白"
+      },
+      {
+        "name": "total_cholesterol",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "总胆固醇"
+      },
+      {
+        "name": "triglycerides",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "甘油三酯"
+      },
+      {
+        "name": "hdl_c",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "高密度脂蛋白"
+      },
+      {
+        "name": "ldl_c",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "低密度脂蛋白"
+      },
+      {
+        "name": "uric_acid",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "尿酸"
+      },
+      {
+        "name": "alt",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "谷丙转氨酶"
+      },
+      {
+        "name": "ast",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "谷草转氨酶"
+      },
+      {
+        "name": "creatinine",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "肌酐"
+      },
+      {
+        "name": "egfr",
+        "type": "DECIMAL(6,2)",
+        "required": "N",
+        "key": "",
+        "desc": "eGFR"
+      },
+      {
+        "name": "blood_type",
+        "type": "VARCHAR(16)",
+        "required": "N",
+        "key": "",
+        "desc": "血型"
+      },
+      {
+        "name": "medical_history",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "既往病史全量"
+      },
+      {
+        "name": "family_history",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "家族史全量"
+      },
+      {
+        "name": "allergy_history",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "过敏史全量"
+      },
+      {
+        "name": "medication_history",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "用药史全量"
+      },
+      {
+        "name": "surgery_history",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "手术史全量"
+      },
+      {
+        "name": "smoking_status",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "吸烟状态"
+      },
+      {
+        "name": "drinking_status",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "饮酒状态"
+      },
+      {
+        "name": "exercise_frequency",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "运动频率"
+      },
+      {
+        "name": "exercise_type",
+        "type": "VARCHAR(255)",
+        "required": "N",
+        "key": "",
+        "desc": "运动类型"
+      },
+      {
+        "name": "sleep_hours",
+        "type": "DECIMAL(4,1)",
+        "required": "N",
+        "key": "",
+        "desc": "睡眠时长"
+      },
+      {
+        "name": "sleep_quality",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "",
+        "desc": "睡眠质量"
+      },
+      {
+        "name": "diet_preference",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "饮食偏好/忌口"
+      },
+      {
+        "name": "health_goal",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "健康目标"
+      },
+      {
+        "name": "chronic_disease",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "慢病情况"
+      },
+      {
+        "name": "pregnancy_status",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "",
+        "desc": "孕产状态"
+      },
+      {
+        "name": "menstrual_status",
+        "type": "VARCHAR(32)",
+        "required": "N",
+        "key": "",
+        "desc": "月经状态"
+      },
+      {
+        "name": "health_risk_tags",
+        "type": "JSON",
+        "required": "N",
+        "key": "IDX",
+        "desc": "健康风险标签"
+      },
+      {
+        "name": "ai_memory_summary",
+        "type": "TEXT",
+        "required": "N",
+        "key": "",
+        "desc": "机器人长期记忆摘要"
+      },
+      {
+        "name": "ai_memory_json",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "结构化记忆：偏好/禁忌/目标/健康关注点"
+      },
+      {
+        "name": "memory_updated_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "记忆最后更新时间"
+      },
+      {
+        "name": "current_stage",
+        "type": "VARCHAR(64)",
+        "required": "N",
+        "key": "IDX",
+        "desc": "当前阶段"
+      },
+      {
+        "name": "progress_raw",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "user_progress 全量兜底"
+      },
+      {
+        "name": "progress_updated_at",
+        "type": "DATETIME",
+        "required": "N",
+        "key": "",
+        "desc": "进度更新时间"
+      },
+      {
+        "name": "guide_images_raw",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "操作指南图片全量"
+      },
+      {
+        "name": "report_images_raw",
+        "type": "JSON",
+        "required": "N",
+        "key": "",
+        "desc": "报告图片全量"
+      }
+    ]
+  }
+]

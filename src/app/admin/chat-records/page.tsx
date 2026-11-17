@@ -25,6 +25,8 @@ type ChatRecordFile = {
   source_type?: string | null;
   source_url?: string | null;
   record_count: number;
+  parsed_at?: string | null;
+  ds_provider?: string | null;
   confirmed_at?: string | null;
   committed_at?: string | null;
   updated_at?: string;
@@ -60,11 +62,13 @@ function formatTime(value?: string | null) {
 export default function ChatRecordsPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sqliteInputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<ChatRecordFile[]>([]);
   const [stats, setStats] = useState<ChatFileStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyName, setBusyName] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [importingSqlite, setImportingSqlite] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [selectedSource, setSelectedSource] = useState('agent_chat_api');
   const [message, setMessage] = useState('');
@@ -145,6 +149,35 @@ export default function ChatRecordsPage() {
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
+  async function importSqlite(file: File) {
+    const token = auth();
+    if (!token || importingSqlite) return;
+    setImportingSqlite(true);
+    setMessage('');
+    setError('');
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch('/api/admin/chat-records/import-sqlite', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.success) {
+        setError(body?.message || `导入 SQLite 失败（HTTP ${res.status}）`);
+        return;
+      }
+      setMessage(`「${file.name}」已由 ${body.data.dsProvider} DS 解析：${body.data.recordCount} 条消息，按 sender_id 汇总为 ${body.data.chatSenders} 个用户聊天 DOCX，排除 self ${body.data.excludedSelfMessages} 条，未写 Supabase`);
+      await load();
+    } catch {
+      setError('导入智能体聊天 SQLite 失败，请检查 DS 配置与文件格式');
+    } finally {
+      setImportingSqlite(false);
+      if (sqliteInputRef.current) sqliteInputRef.current.value = '';
     }
   }
 
@@ -235,31 +268,57 @@ export default function ChatRecordsPage() {
     if (!token) return;
     setMessage('');
     setError('');
-    try {
-      const res = await fetch(
-        `/api/admin/chat-records/content?name=${encodeURIComponent(row.name)}${download ? '&download=1' : ''}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        setError(body?.message || `读取文件失败（HTTP ${res.status}）`);
-        return;
-      }
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      if (download) {
+
+    if (download) {
+      try {
+        const res = await fetch(
+          `/api/admin/chat-records/content?name=${encodeURIComponent(row.name)}&download=1`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        if (!res.ok) {
+          const body = await res.json().catch(() => null);
+          setError(body?.message || `读取文件失败（HTTP ${res.status}）`);
+          return;
+        }
+        const url = window.URL.createObjectURL(await res.blob());
         const link = document.createElement('a');
         link.href = url;
         link.download = row.name;
         document.body.appendChild(link);
         link.click();
         link.remove();
-      } else {
-        window.open(url, '_blank');
+        setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+      } catch {
+        setError('下载聊天记录文件失败，请重试');
       }
-      setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+      return;
+    }
+
+    const previewWindow = window.open('', '_blank');
+    if (!previewWindow) {
+      setError('浏览器拦截了预览窗口，请允许弹出窗口后重试');
+      return;
+    }
+    previewWindow.document.write('<!doctype html><meta charset="utf-8"><title>正在加载预览</title><p style="font:14px sans-serif;padding:24px;color:#57534e">正在生成在线预览...</p>');
+
+    try {
+      const res = await fetch(
+        `/api/admin/chat-records/preview?name=${encodeURIComponent(row.name)}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        previewWindow.close();
+        setError(body?.message || `生成预览失败（HTTP ${res.status}）`);
+        return;
+      }
+      const html = await res.text();
+      previewWindow.document.open();
+      previewWindow.document.write(html);
+      previewWindow.document.close();
     } catch {
-      setError('读取聊天记录文件失败，请重试');
+      previewWindow.close();
+      setError('生成聊天记录预览失败，请重试');
     }
   }
 
@@ -297,7 +356,14 @@ export default function ChatRecordsPage() {
   function renderRows(rows: ChatRecordFile[], mode: 'staging' | 'formal') {
     return rows.map((row) => (
       <TableRow key={`${mode}-${row.id}`}>
-        <TableCell className="font-medium">{row.name}</TableCell>
+        <TableCell className="font-medium">
+          {row.name}
+          {row.parsed_at ? (
+            <span className="block text-xs font-normal text-stone-400">
+              {(row.ds_provider || 'DS').toUpperCase()} 已解析 · {formatTime(row.parsed_at)}
+            </span>
+          ) : null}
+        </TableCell>
         <TableCell>
           <Badge className={STATUS_MAP[row.status]?.cls || ''}>
             {STATUS_MAP[row.status]?.label || row.status}
@@ -323,14 +389,16 @@ export default function ChatRecordsPage() {
                 size="sm"
                 variant="outline"
                 className="text-emerald-700 hover:text-emerald-800"
-                disabled={busyName === row.name || row.status === 'committed'}
+                disabled={busyName === row.name || row.status === 'committed' || row.source_type === 'agent_sqlite'}
                 onClick={() => void commitFile(row)}
               >
                 {busyName === row.name
                   ? '上传中...'
                   : row.status === 'committed'
                     ? '已上传数据库'
-                    : '上传数据库'}
+                    : row.source_type === 'agent_sqlite'
+                      ? '待字段映射'
+                      : '上传数据库'}
               </Button>
             )}
             <Button size="sm" variant="outline" onClick={() => void openFile(row)}>
@@ -360,10 +428,29 @@ export default function ChatRecordsPage() {
         <div>
           <h1 className="text-xl font-semibold text-stone-800">用户聊天记录</h1>
           <p className="mt-1 text-sm text-stone-500">
-            外部 API 先进入暂存区，确认后进入正式库；只有点击“上传数据库”才会写入 ai_teacher_chat_message。
+            外部 API 先进入暂存区；智能体 SQLite 由 DS 解析后直接进入本地正式库，确认字段映射前不会写入 ai_teacher_chat_message。
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <input
+            ref={sqliteInputRef}
+            type="file"
+            accept=".db,.sqlite,.sqlite3,application/vnd.sqlite3"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void importSqlite(file);
+            }}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-stone-300"
+            disabled={importingSqlite}
+            onClick={() => sqliteInputRef.current?.click()}
+          >
+            {importingSqlite ? 'DS 解析中...' : '导入智能体 SQLite'}
+          </Button>
           <input
             ref={fileInputRef}
             type="file"

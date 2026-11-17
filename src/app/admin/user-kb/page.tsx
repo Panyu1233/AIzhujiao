@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +29,8 @@ type UserKbFile = {
   content_type?: string | null;
   data_source?: string | null;
   status?: string | null;
+  record_count?: number;
+  ds_provider?: string | null;
   parsed_at?: string | null;
   committed_at?: string | null;
   updated_at?: string;
@@ -40,15 +42,18 @@ const STATUS_MAP: Record<string, { label: string; cls: string }> = {
   committed: { label: '已上传', cls: 'bg-emerald-600 text-white hover:bg-emerald-600' },
 };
 
-type UserDataSourceKey = 'gulesi_mini_program' | 'agent_api';
+type UserDataSourceKey = 'gulesi_mini_program' | 'agent_api' | 'unidentified_agent_user';
 
 const SOURCE_MAP: Record<UserDataSourceKey, { label: string; cls: string }> = {
   gulesi_mini_program: { label: '小程序用户', cls: 'bg-blue-100 text-blue-800 hover:bg-blue-100' },
   agent_api: { label: '智能体用户', cls: 'bg-violet-100 text-violet-800 hover:bg-violet-100' },
+  unidentified_agent_user: { label: '未标识的智能体用户', cls: 'bg-stone-200 text-stone-800 hover:bg-stone-200' },
 };
 
 function sourceKeyOf(row: Pick<UserKbFile, 'data_source'>): UserDataSourceKey | null {
-  return row.data_source === 'agent_api' || row.data_source === 'gulesi_mini_program'
+  return row.data_source === 'agent_api'
+    || row.data_source === 'gulesi_mini_program'
+    || row.data_source === 'unidentified_agent_user'
     ? row.data_source
     : null;
 }
@@ -69,10 +74,12 @@ const PAGE_SIZE = 10;
 
 export default function UserKbPage() {
   const router = useRouter();
+  const sqliteInputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<UserKbFile[]>([]);
   const [calibration, setCalibration] = useState<CalibrationStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
+  const [importingSqlite, setImportingSqlite] = useState(false);
   const [calibrating, setCalibrating] = useState(false);
   const [selectedSource, setSelectedSource] = useState<UserDataSourceKey>('gulesi_mini_program');
   const [sourceFilter, setSourceFilter] = useState<UserDataSourceKey>('gulesi_mini_program');
@@ -86,6 +93,7 @@ export default function UserKbPage() {
 
   const miniFileCount = files.filter((f) => sourceKeyOf(f) === 'gulesi_mini_program').length;
   const agentFileCount = files.filter((f) => sourceKeyOf(f) === 'agent_api').length;
+  const unidentifiedFileCount = files.filter((f) => sourceKeyOf(f) === 'unidentified_agent_user').length;
   const filteredFiles = files.filter((f) => sourceKeyOf(f) === sourceFilter);
   const activeSourceLabel = SOURCE_MAP[sourceFilter].label;
   const stagingFiles = filteredFiles.filter((f) => f.status === 'staging');
@@ -175,6 +183,40 @@ export default function UserKbPage() {
     }
   }
 
+  async function importSqlite(file: File) {
+    const token = auth();
+    if (!token || importingSqlite) return;
+    setImportingSqlite(true);
+    setMessage('');
+    setError('');
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch('/api/admin/user-kb/import-sqlite', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.success) {
+        setError(body?.message || `导入 SQLite 失败（HTTP ${res.status}）`);
+        return;
+      }
+      setSourceFilter('unidentified_agent_user');
+      setPage(1);
+      setStagePage(1);
+      setMessage(
+        `「${file.name}」已由 ${body.data.dsProvider} DS 解析：${body.data.recordCount} 个联系人，按 contact_id 拆分为 ${body.data.docxFiles} 个用户 DOCX，未写 Supabase`,
+      );
+      await load();
+    } catch {
+      setError('导入智能体 SQLite 失败，请检查 DS 配置与文件格式');
+    } finally {
+      setImportingSqlite(false);
+      if (sqliteInputRef.current) sqliteInputRef.current.value = '';
+    }
+  }
+
   async function calibrateUsers() {
     const t = auth();
     if (!t || calibrating) return;
@@ -235,38 +277,61 @@ export default function UserKbPage() {
   }
 
   async function openFile(row: UserKbFile, download = false) {
-    const t = auth();
-    if (!t) return;
+    const token = auth();
+    if (!token) return;
     setMessage('');
     setError('');
-    try {
-      // 通过带 Authorization 的请求获取文件字节，避免浏览器直连受鉴权接口导致 401
-      const res = await fetch(`/api/admin/user-kb/download?name=${encodeURIComponent(row.name)}&download=1`, {
-        headers: { Authorization: `Bearer ${t}` },
-      });
-      if (!res.ok) {
-        const j = await res.json().catch(() => null);
-        setError(j?.message || `获取文件失败（HTTP ${res.status}）`);
-        return;
-      }
-      const blob = await res.blob();
-      const cd = res.headers.get('Content-Disposition') || '';
-      const blobUrl = window.URL.createObjectURL(blob);
-      if (download || cd.includes('attachment')) {
-        // 下载：a 标签 + fetch blob
+
+    if (download) {
+      try {
+        const res = await fetch(
+          `/api/admin/user-kb/download?name=${encodeURIComponent(row.name)}&download=1`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        if (!res.ok) {
+          const body = await res.json().catch(() => null);
+          setError(body?.message || `获取文件失败（HTTP ${res.status}）`);
+          return;
+        }
+        const url = window.URL.createObjectURL(await res.blob());
         const link = document.createElement('a');
-        link.href = blobUrl;
+        link.href = url;
         link.download = row.name;
         document.body.appendChild(link);
         link.click();
         link.remove();
-      } else {
-        // 查看：新标签打开 blob 预览（文本/图片/pdf 可直接预览）
-        window.open(blobUrl, '_blank');
+        setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+      } catch {
+        setError('获取文件失败，请重试');
       }
-      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
+      return;
+    }
+
+    const previewWindow = window.open('', '_blank');
+    if (!previewWindow) {
+      setError('浏览器拦截了预览窗口，请允许弹出窗口后重试');
+      return;
+    }
+    previewWindow.document.write('<!doctype html><meta charset="utf-8"><title>正在加载预览</title><p style="font:14px sans-serif;padding:24px;color:#57534e">正在生成在线预览...</p>');
+
+    try {
+      const res = await fetch(
+        `/api/admin/user-kb/preview?name=${encodeURIComponent(row.name)}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        previewWindow.close();
+        setError(body?.message || `生成预览失败（HTTP ${res.status}）`);
+        return;
+      }
+      const html = await res.text();
+      previewWindow.document.open();
+      previewWindow.document.write(html);
+      previewWindow.document.close();
     } catch {
-      setError('获取文件失败，请重试');
+      previewWindow.close();
+      setError('生成文件预览失败，请重试');
     }
   }
 
@@ -385,10 +450,29 @@ export default function UserKbPage() {
         <div>
           <h1 className="text-xl font-semibold text-stone-800">用户信息管理</h1>
           <p className="mt-1 text-sm text-stone-500">
-            每个用户单独生成一个 DOCX 文件；暂存区可单个解析，也可点击“批量解析”一次处理当前来源全部文件；正式库点击上传后才写入数据库。
+            DOCX/API 数据先进入暂存区；智能体 SQLite 可直接导入并由 DS 解析，保存到“未标识的智能体用户”。所有数据先落本地，暂不写 Supabase。
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <input
+            ref={sqliteInputRef}
+            type="file"
+            accept=".db,.sqlite,.sqlite3,application/vnd.sqlite3"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void importSqlite(file);
+            }}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-stone-300"
+            disabled={importingSqlite}
+            onClick={() => sqliteInputRef.current?.click()}
+          >
+            {importingSqlite ? 'DS 解析中...' : '导入智能体 SQLite'}
+          </Button>
           <Button
             size="sm"
             className="bg-emerald-800 text-white hover:bg-emerald-900"
@@ -467,6 +551,18 @@ export default function UserKbPage() {
             }}
           >
             智能体用户 {agentFileCount}
+          </Button>
+          <Button
+            size="sm"
+            variant={sourceFilter === 'unidentified_agent_user' ? 'default' : 'outline'}
+            className={sourceFilter === 'unidentified_agent_user' ? 'bg-stone-700 text-white hover:bg-stone-800' : ''}
+            onClick={() => {
+              setSourceFilter('unidentified_agent_user');
+              setPage(1);
+              setStagePage(1);
+            }}
+          >
+            未标识的智能体用户 {unidentifiedFileCount}
           </Button>
         </div>
       </div>
@@ -558,7 +654,11 @@ export default function UserKbPage() {
             <TableBody>
               {stagePageRows.map((row) => (
                 <TableRow key={`s-${row.id}-${row.name}`}>
-                  <TableCell className="font-medium">{row.name}</TableCell>
+                  <TableCell className="font-medium">
+                    {row.name}
+                    {row.record_count ? <span className="ml-2 text-xs text-stone-400">{row.record_count.toLocaleString('zh-CN')} 条</span> : null}
+                    {row.ds_provider ? <span className="ml-2 text-xs text-stone-400">{row.ds_provider.toUpperCase()} 已解析</span> : null}
+                  </TableCell>
                   <TableCell>
                     {sourceKeyOf(row) ? (
                       <Badge className={SOURCE_MAP[sourceKeyOf(row)!].cls}>{SOURCE_MAP[sourceKeyOf(row)!].label}</Badge>
@@ -650,7 +750,11 @@ export default function UserKbPage() {
             <TableBody>
               {dbPageRows.map((row) => (
                 <TableRow key={`d-${row.id}-${row.name}`}>
-                  <TableCell className="font-medium">{row.name}</TableCell>
+                  <TableCell className="font-medium">
+                    {row.name}
+                    {row.record_count ? <span className="ml-2 text-xs text-stone-400">{row.record_count.toLocaleString('zh-CN')} 条</span> : null}
+                    {row.ds_provider ? <span className="ml-2 text-xs text-stone-400">{row.ds_provider.toUpperCase()} 已解析</span> : null}
+                  </TableCell>
                   <TableCell>
                     {sourceKeyOf(row) ? (
                       <Badge className={SOURCE_MAP[sourceKeyOf(row)!].cls}>{SOURCE_MAP[sourceKeyOf(row)!].label}</Badge>
@@ -675,11 +779,17 @@ export default function UserKbPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        disabled={busyName === row.name || row.status === 'committed'}
+                        disabled={busyName === row.name || row.status === 'committed' || sourceKeyOf(row) === 'unidentified_agent_user'}
                         onClick={() => commitFile(row)}
                         className="text-emerald-700 hover:text-emerald-800"
                       >
-                        {busyName === row.name ? '上传中...' : row.status === 'committed' ? '已上传' : '上传数据库'}
+                        {busyName === row.name
+                          ? '上传中...'
+                          : row.status === 'committed'
+                            ? '已上传'
+                            : sourceKeyOf(row) === 'unidentified_agent_user'
+                              ? '待字段映射'
+                              : '上传数据库'}
                       </Button>
                       <Button size="sm" variant="outline" className="text-emerald-700 hover:text-emerald-800" onClick={() => openFile(row)}>
                         查看

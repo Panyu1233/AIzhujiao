@@ -27,8 +27,14 @@ export async function POST(req: NextRequest) {
       throw new Error('该文件尚未确认，请先点击「确认」');
     }
 
-    const source: UserDataSource =
-      detail.data_source === 'agent_api' ? 'agent_api' : 'gulesi_mini_program';
+    const source: UserDataSource = detail.data_source === 'agent_api'
+      ? 'agent_api'
+      : detail.data_source === 'unidentified_agent_user'
+        ? 'unidentified_agent_user'
+        : 'gulesi_mini_program';
+    if (source === 'unidentified_agent_user') {
+      throw new Error('未标识的智能体用户目前只做本地 DS 解析，尚未建立 Supabase 字段映射，暂不能上传');
+    }
     const result = await commitUserInfo(parsed, source);
     await userKbUpdateStatus(name, 'committed', { committed_at: true });
 

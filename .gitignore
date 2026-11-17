@@ -166,6 +166,8 @@ Desktop.ini
 *.temp
 .tmp/
 .temp/
+/.tmp-*
+/$null
 # Optional files
 *.tgz
 *.tar

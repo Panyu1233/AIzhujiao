@@ -102,64 +102,144 @@ interface ParseOptions {
   templateHint?: string;
 }
 
-/**
- * 调用 DS 模型解析 docx 内容。
- * 返回解析后的结构化数据（未知结构，由模型按表格模板决定；通常是 JSON 对象或数组）。
- */
-export async function parseWithDS(docxBuffer: Buffer, opts: ParseOptions = {}): Promise<unknown> {
+export interface DsJsonOptions {
+  maxTokens?: number;
+  temperature?: number;
+}
+
+function parseDsJsonContent(content: string): unknown {
+  const trimmed = content.trim();
+  const stripped = trimmed
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim();
+  const candidates = [stripped];
+  const objectStart = stripped.indexOf('{');
+  const arrayStart = stripped.indexOf('[');
+  const starts = [objectStart, arrayStart].filter((index) => index >= 0);
+  if (starts.length > 0) {
+    const first = Math.min(...starts);
+    const objectEnd = stripped.lastIndexOf('}');
+    const arrayEnd = stripped.lastIndexOf(']');
+    const last = Math.max(objectEnd, arrayEnd);
+    if (last > first) candidates.push(stripped.slice(first, last + 1));
+  }
+  for (const candidate of candidates) {
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      // 继续尝试下一个候选片段。
+    }
+  }
+  throw new Error('DS 模型返回的内容不是合法 JSON，请检查解析结果');
+}
+
+/** 调用已配置的 ARK / DeepSeek 模型，返回严格 JSON。 */
+export async function callDsJson(
+  systemPrompt: string,
+  userContent: string,
+  opts: DsJsonOptions = {},
+): Promise<unknown> {
   if (!isDsConfigured()) {
     throw new Error(
       'DS 模型 API 未配置：请在部署面板配置 ARK_API_KEY（火山方舟）或 DS_API_KEY（官方 DeepSeek）',
     );
   }
-  const text = await extractDocxText(docxBuffer);
-  if (!text) {
-    throw new Error('docx 内容为空，无法解析');
-  }
-
-  const templateHint =
-    opts.templateHint ??
-    buildUserInfoTemplateHint();
+  if (!userContent.trim()) throw new Error('待解析内容为空');
 
   const ep = getDsEndpoint();
   const isArk = getDsProvider() === 'ark';
-  const response = await fetch(`${ep.baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${ep.apiKey}`,
-    },
-    body: JSON.stringify({
-      model: ep.model,
-      messages: [
-        {
-          role: 'system',
-          content: `你是数据解析助手。请把用户文档内容解析为结构化数据，严格对照如下信息字段模板：${templateHint}。只返回合法 JSON 对象，不要包含解释性文字。`,
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    let response: Response;
+    try {
+      response = await fetch(`${ep.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${ep.apiKey}`,
         },
-        { role: 'user', content: text },
-      ],
-      // 方舟托管推理模型不支持 temperature / response_format 约束，仅官方 OpenAI 兼容口径下才传
-      ...(isArk ? {} : { temperature: 0, response_format: { type: 'json_object' } as const }),
-      max_tokens: 8000,
-      stream: false,
-    }),
-  });
+        body: JSON.stringify({
+          model: ep.model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userContent },
+          ],
+          ...(isArk
+            ? {}
+            : {
+                temperature: opts.temperature ?? 0,
+                response_format: { type: 'json_object' } as const,
+              }),
+          max_tokens: opts.maxTokens ?? 8000,
+          stream: false,
+        }),
+      });
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      if (attempt < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 800 * (attempt + 1)));
+        continue;
+      }
+      throw lastError;
+    }
 
-  if (!response.ok) {
-    const errText = await response.text().catch(() => '');
-    throw new Error(`DS 模型调用失败（${response.status}）：${errText.slice(0, 300)}`);
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      if (attempt < 2 && (response.status === 429 || response.status >= 500)) {
+        lastError = new Error(`DS 模型调用失败（${response.status}）：${errText.slice(0, 300)}`);
+        await new Promise((resolve) => setTimeout(resolve, 800 * (attempt + 1)));
+        continue;
+      }
+      throw new Error(`DS 模型调用失败（${response.status}）：${errText.slice(0, 300)}`);
+    }
+
+    let payload: { choices?: { message?: { content?: string } }[] };
+    try {
+      payload = (await response.json()) as typeof payload;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      if (attempt < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 800 * (attempt + 1)));
+        continue;
+      }
+      break;
+    }
+
+    const content = payload.choices?.[0]?.message?.content ?? '';
+    if (content.trim()) {
+      try {
+        return parseDsJsonContent(content);
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+      }
+    } else {
+      lastError = new Error('DS 模型返回内容为空');
+    }
+
+    if (attempt < 2) {
+      await new Promise((resolve) => setTimeout(resolve, 800 * (attempt + 1)));
+    }
   }
-  const payload = (await response.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  const content = payload.choices?.[0]?.message?.content ?? '';
-  try {
-    return JSON.parse(content);
-  } catch {
-    throw new Error('DS 模型返回的内容不是合法 JSON，请检查解析结果');
-  }
+
+  throw new Error(
+    `DS 模型连续 3 次未返回可解析 JSON：${lastError?.message ?? '未知原因'}`,
+  );
 }
 
+/**
+ * 调用 DS 模型解析 docx 内容。
+ * 返回解析后的结构化数据（未知结构，由模型按表格模板决定；通常是 JSON 对象或数组）。
+ */
+export async function parseWithDS(docxBuffer: Buffer, opts: ParseOptions = {}): Promise<unknown> {
+  const text = await extractDocxText(docxBuffer);
+  if (!text) throw new Error('docx 内容为空，无法解析');
+  const templateHint = opts.templateHint ?? buildUserInfoTemplateHint();
+  return callDsJson(
+    `你是数据解析助手。请把用户文档内容解析为结构化数据，严格对照如下信息字段模板：${templateHint}。只返回合法 JSON 对象，不要包含解释性文字。`,
+    text,
+  );
+}
 /**
  * 把解析结果写入对应来源表：
  * - 小程序用户 -> user_info_mini
@@ -171,7 +251,7 @@ export interface CommitResult {
   inserted: unknown[];
 }
 
-const SOURCE_TABLE: Record<UserDataSource, string> = {
+const SOURCE_TABLE: Record<Exclude<UserDataSource, 'unidentified_agent_user'>, string> = {
   gulesi_mini_program: tableName('user_info_mini'),
   agent_api: tableName('user_info_agent'),
 };
@@ -214,6 +294,9 @@ function normalizeSourceRow(
 }
 
 export async function commitUserInfo(data: unknown, source: UserDataSource): Promise<CommitResult> {
+  if (source === 'unidentified_agent_user') {
+    throw new Error('未标识的智能体用户目前只做本地 DS 解析，尚未建立 Supabase 字段映射，暂不能上传');
+  }
   if (!isShareConfigured()) {
     throw new Error(
       'Alzhujiao Supabase 未配置：请配置 ALZHUJIAO_SUPABASE_URL / ALZHUJIAO_SUPABASE_KEY',
@@ -256,8 +339,14 @@ export async function deleteCommittedUserInfoFile(name: string): Promise<{
   if (parsed === null || parsed === undefined) {
     throw new Error('文件已标记为已上传，但找不到解析结果，无法删除数据库记录');
   }
-  const source: UserDataSource =
-    detail.data_source === 'agent_api' ? 'agent_api' : 'gulesi_mini_program';
+  const source: UserDataSource = detail.data_source === 'agent_api'
+    ? 'agent_api'
+    : detail.data_source === 'unidentified_agent_user'
+      ? 'unidentified_agent_user'
+      : 'gulesi_mini_program';
+  if (source === 'unidentified_agent_user') {
+    throw new Error('未标识的智能体用户尚未建立 Supabase 删除映射，不能删除远端记录');
+  }
   const table = SOURCE_TABLE[source];
   const rows = extractUserInfoRows(parsed).map((row, index) => normalizeSourceRow(row, index, source));
   const phones = [...new Set(rows.map((row) => String(row.phone || '').trim()).filter(Boolean))];
@@ -399,13 +488,3 @@ export async function parseUserKbFileToXlsx(name: string): Promise<{
   );
   return { parsed, xlsxName, xlsxSize: xlsx.length };
 }
-
-
-
-
-
-
-
-
-
-

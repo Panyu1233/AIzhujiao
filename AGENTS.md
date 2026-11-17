@@ -1,5 +1,10 @@
 # AGENTS.md
 
+## 会话续接
+
+- 继续本项目任务前，先读取项目根目录的 `HANDOFF.md` 一次。
+- 若 `HANDOFF.md` 可能过期，用 `git status --short` 和 `git diff --stat` 核对后再继续。
+
 ## 项目概览
 
 知识库文件 API 服务：把 `active` 目录中的文件通过 HTTP API 暴露给 FastGPT「API 文件库」拉取。
